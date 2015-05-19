@@ -2,8 +2,15 @@ grammar de.htwg.mdsd.xtext.portals.Dsl with org.eclipse.xtext.common.Terminals
 
 generate dsl "http://www.htwg.de/mdsd/xtext/portals/Dsl"
 
-Model:
-	greetings+=Greeting*;
+
 	
-Greeting:
-	'Hello' name=ID '!';
+Playground: 'Playground' name=ID 'with height' height=INT 'and width' width=INT  
+'with player' player=Player
+'and bots' (bots += [Bot]) (',' bots += [Bot])*
+'and terrain' (terrain += [Terrain]) (',' terrain += [Terrain])*;
+
+Terrain: 'Terrain' type=ID;
+	
+Player: 'Player' name=ID;
+
+Bot: 'Bot' type=ID;
