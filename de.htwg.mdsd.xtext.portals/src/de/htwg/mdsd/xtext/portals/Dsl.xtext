@@ -1,0 +1,9 @@
+grammar de.htwg.mdsd.xtext.portals.Dsl with org.eclipse.xtext.common.Terminals
+
+generate dsl "http://www.htwg.de/mdsd/xtext/portals/Dsl"
+
+Model:
+	greetings+=Greeting*;
+	
+Greeting:
+	'Hello' name=ID '!';
