@@ -9,8 +9,23 @@ Playground: 'Playground' name=ID 'with height' height=INT 'and width' width=INT
 'and bots' (bots += [Bot]) (',' bots += [Bot])*
 'and terrain' (terrain += [Terrain]) (',' terrain += [Terrain])*;
 
-Terrain: 'Terrain' type=ID;
-	
-Player: 'Player' name=ID;
+Terrain: 'Terrain' 
+	type=ID '=' symbol=STRING 
+	'with movement cost' movementCost=INT
+	(playerWalkable?='is walkable by player'|'is not walkable by player') 
+	'and walkable by' (bots += [Bot])(',' bots += [Bot])*
+	(endGame?='end game') 
+;
 
-Bot: 'Bot' type=ID;
+Player: 'Player' 
+	name=ID '=' symbol=STRING
+	'with speed' speed=INT
+	'destroys bot' (bots += [Bot])(',' bots += [Bot])* 
+;
+
+Bot: 'Bot' 
+	type=ID '=' symbol=STRING 
+	'with speed' speed=INT
+	'destroys bot' (bots += [Bot])(',' bots += [Bot])*
+	(endGame?='destroys player') 
+;
