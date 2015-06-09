@@ -10,6 +10,7 @@ import de.htwg.mdsd.xtext.portals.dsl.Terrain
 import de.htwg.mdsd.xtext.portals.dsl.Game
 import org.eclipse.emf.common.util.EList
 import de.htwg.mdsd.xtext.portals.dsl.Player
+import de.htwg.mdsd.xtext.portals.dsl.Bot
 
 /**
  * Generates code from your model files on save.
@@ -28,15 +29,50 @@ class DslGenerator implements IGenerator {
 
 		fsa.generateFile(packagePath + "\\model\\Terrain.scala", generateTerrains(game.terrains))
 		fsa.generateFile(packagePath + "\\model\\Human.scala", generatePlayer(game.player))
-
-	// for (bus : resource.allContents.toIterable.filter(typeof(Bus))) {
-	// fsa.generateFile(stadt.name + "\\" + "bus" + "\\" + bus.name + ".java", bus.content)
-	// }
-//		fsa.generateFile('greetings.txt', 'People to greet: ' + 
-//			resource.allContents
-//				.filter(typeof(Greeting))
-//				.map[name]
-//				.join(', '))
+		fsa.generateFile(packagePath + "\\model\\Bots.scala", generateBots(game.bots))
+		fsa.generateFile(packagePath + "\\model\\PlayerFactory.scala", generatePlayerFactory(game.player, game.bots))
+	}
+	
+	def generatePlayerFactory(Player player, EList<Bot> list) { '''
+		// companion object to get Terrain instances, like a factory method.
+		object Player {
+		  def HumanPlayer1 = "1"
+		
+		  def apply(char: Char, position: Position): Option[Player] = char match {
+		    case '1' =>
+		      Some(Human(HumanPlayer1, position, Stay, 0))
+		    case 'B' =>
+		      Some(Bot(id, position, Up, Stay, 0))
+		    case _ => None
+		  }
+		}
+	'''
+	}
+	
+	
+	def CharSequence generateBots(EList<Bot> bots) { '''
+		«FOR bot : bots»
+			case class «bot.name.toFirstUpper»(
+			  override val uuid : String,
+			  override val position : Position,
+			  override val direction : Direction,
+			  val lastValid : Direction,
+			  override val movementCost : Int) extends Bot {
+				override def toString = "«bot.symbol»"
+				override def destroy(player : Player) = player match {
+				  	case (player : Human) => «bot.endGame»
+					«FOR player : bot.bots»
+					case (player : «player.name.toFirstUpper») => true
+	    			«ENDFOR»
+					case _ => false
+				}
+				def validMove(movementCost : Int) = new «bot.name.toFirstUpper»(uuid, nextPosition, direction, direction, movementCost)
+				def invalidMove = new «bot.name.toFirstUpper»(uuid, position, switchDirection(lastValid, direction), direction, movementCost)
+				def paiyMovementCost() = new «bot.name.toFirstUpper»(uuid, position, direction, direction, movementCost - «bot.speed»)
+			}
+			
+		«ENDFOR»
+	'''
 	}
 
 	def CharSequence generatePlayer(Player player) {
@@ -53,13 +89,12 @@ class DslGenerator implements IGenerator {
 			def paiyMovementCost() = new Human(uuid, position, direction, movementCost - «player.speed»);
 			override def destroy(player : Player) = player match {
 				«FOR bot : player.bots»
-				case (player : «bot.name») => true
+				case (player : «bot.name.toFirstUpper») => true
     			«ENDFOR»
 				case _ => false
 			}
 		}
 	'''
-
 	}
 
 	def CharSequence generateTerrains(EList<Terrain> terrains) {
