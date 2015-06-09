@@ -2,30 +2,31 @@ grammar de.htwg.mdsd.xtext.portals.Dsl with org.eclipse.xtext.common.Terminals
 
 generate dsl "http://www.htwg.de/mdsd/xtext/portals/Dsl"
 
-
+Game: bots+=Bot* player=Player terrains+=Terrain* playground=Playground ;
+	
+Bot: 'Bot' 
+	name=ID '=' symbol=STRING 
+	'with speed' speed=INT
+	'destroys bot [' (bots += [Bot])? (',' bots += [Bot])* ']'
+	(endGame?='destroys player')? 
+;
 	
 Playground: 'Playground' name=ID 'with height' height=INT 'and width' width=INT  
-'with player' player=Player
+'with player' player=[Player]
 'and bots' (bots += [Bot]) (',' bots += [Bot])*
 'and terrain' (terrain += [Terrain]) (',' terrain += [Terrain])*;
 
 Terrain: 'Terrain' 
-	type=ID '=' symbol=STRING 
+	name=ID '=' symbol=STRING 
 	'with movement cost' movementCost=INT
 	(playerWalkable?='is walkable by player'|'is not walkable by player') 
 	'and walkable by' (bots += [Bot])(',' bots += [Bot])*
-	(endGame?='end game') 
+	(endGame?='end game')?
 ;
 
 Player: 'Player' 
 	name=ID '=' symbol=STRING
 	'with speed' speed=INT
-	'destroys bot' (bots += [Bot])(',' bots += [Bot])* 
+	'destroys bot [' (bots += [Bot])? (',' bots += [Bot])* ']'
 ;
 
-Bot: 'Bot' 
-	type=ID '=' symbol=STRING 
-	'with speed' speed=INT
-	'destroys bot' (bots += [Bot])(',' bots += [Bot])*
-	(endGame?='destroys player') 
-;
