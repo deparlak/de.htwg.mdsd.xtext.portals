@@ -6,7 +6,10 @@ package de.htwg.mdsd.xtext.portals.generator
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess
-import de.htwg.mdsd.xtext.portals.dsl.Playground
+import de.htwg.mdsd.xtext.portals.dsl.Terrain
+import de.htwg.mdsd.xtext.portals.dsl.Game
+import org.eclipse.emf.common.util.EList
+import de.htwg.mdsd.xtext.portals.dsl.Player
 
 /**
  * Generates code from your model files on save.
@@ -14,20 +17,86 @@ import de.htwg.mdsd.xtext.portals.dsl.Playground
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#code-generation
  */
 class DslGenerator implements IGenerator {
-	
+
+	var packageName = "de.htwg.mps.portals.";
+
 	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
-		stadt = resource.contents.filter(typeof(Playground)).head
+		val game = resource.contents.filter(typeof(Game)).head
 
-		generateModel(fsa)
-		fsa.generateFile(stadt.name.toFirstLower + "\\" + stadt.name.toFirstUpper + ".java", stadt.content(resource))
+		val packagePath = "de\\htwg\\mps\\portals\\" + game.name.toFirstLower
+		packageName = packageName + game.name.toFirstLower
 
-	//		for (bus : resource.allContents.toIterable.filter(typeof(Bus))) {
-	//			fsa.generateFile(stadt.name + "\\" + "bus" + "\\" + bus.name + ".java", bus.content)
-	//		}
+		fsa.generateFile(packagePath + "\\model\\Terrain.scala", generateTerrains(game.terrains))
+		fsa.generateFile(packagePath + "\\model\\Human.scala", generatePlayer(game.player))
+
+	// for (bus : resource.allContents.toIterable.filter(typeof(Bus))) {
+	// fsa.generateFile(stadt.name + "\\" + "bus" + "\\" + bus.name + ".java", bus.content)
+	// }
 //		fsa.generateFile('greetings.txt', 'People to greet: ' + 
 //			resource.allContents
 //				.filter(typeof(Greeting))
 //				.map[name]
 //				.join(', '))
 	}
+
+	def CharSequence generatePlayer(Player player) {
+		'''
+		case class Human(
+			   override val uuid : String, 
+			   override val position : Position,
+			   override val direction : Direction,
+			   override val movementCost : Int) extends Player {
+			override def toString = "«player.symbol»"
+			def switchDirection(direction : Direction) = new Human(uuid, position, direction, movementCost)
+			def validMove(movementCost : Int) = new Human(uuid, nextPosition, direction, movementCost)
+			def invalidMove = new Human(uuid, position, Stay, movementCost)
+			def paiyMovementCost() = new Human(uuid, position, direction, movementCost - «player.speed»);
+			override def destroy(player : Player) = player match {
+				«FOR bot : player.bots»
+				case (player : «bot.name») => true
+    			«ENDFOR»
+				case _ => false
+			}
+		}
+	'''
+
+	}
+
+	def CharSequence generateTerrains(EList<Terrain> terrains) {
+		'''
+			package «packageName».model
+			
+			sealed trait Terrain {
+			  def walkableBy(player : Player) = false
+			  def endGame = false
+			  def movementCost = 0
+			  def toString : String
+			}
+			
+			// companion object to get Terrain instances, like a factory method.
+			object Terrain {
+			  def apply(char : Char) = char match {
+			«FOR terrain : terrains»
+				case '«terrain.symbol»' => «terrain.name»
+			«ENDFOR»
+			  }
+			}
+			
+			«FOR terrain : terrains»
+				case object «terrain.name» extends Terrain {
+				  override def toString = "«terrain.symbol»"
+				  override def movementCost = «terrain.movementCost»
+				  override def endGame = «terrain.endGame»
+				  override def walkableBy(player : Player) = player match {
+				    case _ : Human => «terrain.playerWalkable»
+				    «FOR bot : terrain.bots»
+				    	case _ : «bot.name» => true
+				    «ENDFOR»
+				    case _		   => false
+				  }
+				}
+			«ENDFOR»
+		'''
+	}
+
 }
