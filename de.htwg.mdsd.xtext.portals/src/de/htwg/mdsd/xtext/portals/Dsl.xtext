@@ -14,6 +14,7 @@ Bot: 'Bot'
 
 Terrain: 'Terrain' 
 	name=ID '=' symbol=STRING 
+	'has image' image=STRING
 	'with movement cost' movementCost=INT
 	(playerWalkable?='is walkable by player'|'is not walkable by player') 
 	'and walkable by' (bots += [Bot])(',' bots += [Bot])*

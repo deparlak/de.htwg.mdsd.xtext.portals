@@ -19,19 +19,46 @@ import de.htwg.mdsd.xtext.portals.dsl.Bot
  */
 class DslGenerator implements IGenerator {
 
-	var packageName = "de.htwg.mps.portals.";
+	var packageName = "de.htwg.mps.portals";
 
 	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
 		val game = resource.contents.filter(typeof(Game)).head
 
-		val packagePath = "de\\htwg\\mps\\portals\\" + game.name.toFirstLower
-		packageName = packageName + game.name.toFirstLower
+		val packagePath = "de\\htwg\\mps\\portals\\" //+ game.name.toFirstLower
+		packageName = packageName //+ game.name.toFirstLower
 
 		fsa.generateFile(packagePath + "\\model\\Terrain.scala", generateTerrains(game.terrains))
 		fsa.generateFile(packagePath + "\\model\\Human.scala", generatePlayer(game.player))
 		fsa.generateFile(packagePath + "\\model\\Bots.scala", generateBots(game.bots))
 		fsa.generateFile(packagePath + "\\model\\PlayerFactory.scala", generatePlayerFactory(game.player, game.bots))
 		fsa.generateFile(packagePath + "\\swing\\PlayerSprites.scala", generatePlayerSprites(game.player, game.bots))
+		fsa.generateFile(packagePath + "\\swing\\TerrainSprite.scala", generateTerrainSprites(game.terrains))
+	}
+	
+	def generateTerrainSprites(EList<Terrain> terrains) {'''
+	package «packageName».swing
+	
+	import de.htwg.mps.portals.model._
+	import de.htwg.mps.portals.swing.util._
+	
+	object TerrainSprite {
+	  def apply(terrain : Terrain) : TerrainSprite = terrain match {
+        «FOR terrain : terrains»
+	    case «terrain.name» 	=> new «terrain.name»Sprite
+		«ENDFOR»
+	  }
+	}
+	
+	trait TerrainSprite {
+	  def sprite : Sprite
+	}
+    «FOR terrain : terrains»
+	class «terrain.name»Sprite extends TerrainSprite {
+	  val sprite = new Sprite ("/sprite/default/«terrain.image».png", 32, 32, 0, 0)
+	}
+	«ENDFOR»
+		
+	'''
 	}
 	
 	def generatePlayerSprites(Player player, EList<Bot> bots) {''' 
