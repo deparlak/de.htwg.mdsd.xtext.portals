@@ -31,18 +31,57 @@ class DslGenerator implements IGenerator {
 		fsa.generateFile(packagePath + "\\model\\Human.scala", generatePlayer(game.player))
 		fsa.generateFile(packagePath + "\\model\\Bots.scala", generateBots(game.bots))
 		fsa.generateFile(packagePath + "\\model\\PlayerFactory.scala", generatePlayerFactory(game.player, game.bots))
+		fsa.generateFile(packagePath + "\\swing\\PlayerSprites.scala", generatePlayerSprites(game.player, game.bots))
 	}
 	
-	def generatePlayerFactory(Player player, EList<Bot> list) { '''
+	def generatePlayerSprites(Player player, EList<Bot> bots) {''' 
+		package «packageName».swing
+		
+		import scala.concurrent.ExecutionContext.Implicits.global
+		import scala.concurrent.Future
+		import scala.concurrent.duration._
+		import de.htwg.mps.portals.model.Player
+		import de.htwg.mps.portals.swing.util._
+		import de.htwg.mps.portals.swing.PlayerSprite
+		import de.htwg.mps.portals.model._
+		
 		// companion object to get Terrain instances, like a factory method.
-		object Player {
-		  def HumanPlayer1 = "1"
+		object PlayerSprites {
+		  def apply(player : Player) : PlayerSprite = player match {
+		    case Human(_,_,_,_) => new «player.name»Sprite
+        «FOR bot : bots»
+			case «bot.name»(_,_,_,_,_) => new «bot.name»Sprite
+		«ENDFOR»
+		  }
+		}
+		
+		class «player.name»Sprite extends PlayerSprite {
+		  val image = "/sprite/default/player/«player.color».png"
+		}
+		
+        «FOR bot : bots»
+		class «bot.name»Sprite extends PlayerSprite {
+		  val image = "/sprite/default/player/«bot.color».png"
+		}
+		«ENDFOR»
+		'''
+	}
+	
+	def generatePlayerFactory(Player player, EList<Bot> bots) { '''
+		package «packageName».model
+	
+		// companion object to get Terrain instances, like a factory method.
+		object PlayerFactory {
+		  def HumanPlayer1 = "«player.symbol»"
 		
 		  def apply(char: Char, position: Position): Option[Player] = char match {
-		    case '1' =>
+		    case '«player.symbol»' =>
 		      Some(Human(HumanPlayer1, position, Stay, 0))
-		    case 'B' =>
-		      Some(Bot(id, position, Up, Stay, 0))
+	        «FOR bot : bots»
+			case '«bot.symbol»' =>
+				val id = java.util.UUID.randomUUID.toString
+		        Some(«bot.name.toFirstUpper»(id, position, Up, Stay, 0))
+			«ENDFOR»
 		    case _ => None
 		  }
 		}
@@ -51,6 +90,8 @@ class DslGenerator implements IGenerator {
 	
 	
 	def CharSequence generateBots(EList<Bot> bots) { '''
+		package «packageName».model
+		
 		«FOR bot : bots»
 			case class «bot.name.toFirstUpper»(
 			  override val uuid : String,
@@ -77,6 +118,8 @@ class DslGenerator implements IGenerator {
 
 	def CharSequence generatePlayer(Player player) {
 		'''
+		package «packageName».model
+		
 		case class Human(
 			   override val uuid : String, 
 			   override val position : Position,
@@ -112,20 +155,20 @@ class DslGenerator implements IGenerator {
 			object Terrain {
 			  def apply(char : Char) = char match {
 			«FOR terrain : terrains»
-				case '«terrain.symbol»' => «terrain.name»
+				case '«terrain.symbol»' => «terrain.name.toFirstUpper»
 			«ENDFOR»
 			  }
 			}
 			
 			«FOR terrain : terrains»
-				case object «terrain.name» extends Terrain {
+				case object «terrain.name.toFirstUpper» extends Terrain {
 				  override def toString = "«terrain.symbol»"
 				  override def movementCost = «terrain.movementCost»
 				  override def endGame = «terrain.endGame»
 				  override def walkableBy(player : Player) = player match {
 				    case _ : Human => «terrain.playerWalkable»
 				    «FOR bot : terrain.bots»
-				    	case _ : «bot.name» => true
+				    	case _ : «bot.name.toFirstUpper» => true
 				    «ENDFOR»
 				    case _		   => false
 				  }

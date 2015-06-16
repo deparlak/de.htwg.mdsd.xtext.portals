@@ -7,6 +7,7 @@ Game: 'Game: ' name=ID  player=Player bots+=Bot* terrains+=Terrain*;
 Bot: 'Bot' 
 	name=ID '=' symbol=STRING 
 	'with speed' speed=INT
+	'has color'  color=STRING
 	'destroys bot [' (bots += [Bot])? (',' bots += [Bot])* ']'
 	(endGame?='destroys player')? 
 ;
@@ -22,6 +23,8 @@ Terrain: 'Terrain'
 Player: 'Player' 
 	name=ID '=' symbol=STRING
 	'with speed' speed=INT
+	'has color'  color=STRING
 	'destroys bot [' (bots += [Bot])? (',' bots += [Bot])* ']'
 ;
 
+terminal ID: ('A'..'Z') ('a'..'z'|'A'..'Z'|'0'..'9')*;

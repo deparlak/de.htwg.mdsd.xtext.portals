@@ -1,10 +1,5 @@
 package de.htwg.mps.portals.model
 
-import de.htwg.mps.portals.actor.AktorSystem
-import de.htwg.mps.portals.config.TestConfiguration
-import com.escalatesoft.subcut.inject.Injectable
-import de.htwg.mps.portals.actor.AktorSystem
-
 sealed trait Direction
 final case object Left extends Direction
 final case object Right extends Direction
@@ -33,12 +28,7 @@ trait Player {
 }
 
 abstract class Bot extends Player {
-  override def toString();
-  override def destroy(player: Player);
   def switchDirection(direction: Direction) = this
-  def validMove(movementCost: Int);
-  def invalidMove;
-  def paiyMovementCost();
   protected def switchDirection(lastValid: Direction, lastInvalid: Direction): Direction = (lastValid, lastInvalid) match {
     case (Up, Up)       => Left
     case (Up, Left)     => Right

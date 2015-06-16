@@ -12,12 +12,8 @@ final case class Destroyed(player : Player, destroyed : Player) extends Move
 
 class Playground(val terrain : Map[Position, Terrain] = Map(), val player : Map[Position, Player] = Map()) {
   // constants
-  val PlaygroundWidth = getWidth();
+  val PlaygroundWidth = 29
   val PlaygroundHeight = 13
-  
-  def getWidth() {
-    return 26;
-  }
   
   // set the move direction for a player
   def setMove(uuid : String, direction : Direction) : Playground = {
@@ -112,10 +108,10 @@ class Playground(val terrain : Map[Position, Terrain] = Map(), val player : Map[
 
     // default initialization of terrain field.
     // each field is a grass field.
-    for (
-        y <- 0 to PlaygroundHeight - 1;
-        x <- 0 to PlaygroundWidth - 1
-    ) yield terrain += (new Position(x, y) -> Grass)
+    //    for (
+    //        y <- 0 to PlaygroundHeight - 1;
+    //        x <- 0 to PlaygroundWidth - 1
+    //    ) yield terrain += (new Position(x, y) -> Grass)
     
     arr.foreach(input =>
       input match {
@@ -127,7 +123,7 @@ class Playground(val terrain : Map[Position, Terrain] = Map(), val player : Map[
 	          // replace the default terrain
 	          terrain -= position 
 	          terrain += (position -> Terrain(input))
-	          Player(input, position) match {
+	          PlayerFactory(input, position) match {
 	            case (Some(newPlayer)) => player += (position -> newPlayer)
 	            case _				   => None
 	          }
