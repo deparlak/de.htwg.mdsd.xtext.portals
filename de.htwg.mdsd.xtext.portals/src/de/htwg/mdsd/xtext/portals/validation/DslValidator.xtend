@@ -8,6 +8,7 @@ import java.util.List
 import org.eclipse.xtext.validation.Check
 import de.htwg.mdsd.xtext.portals.dsl.DslPackage
 import de.htwg.mdsd.xtext.portals.dsl.Terrain
+import de.htwg.mdsd.xtext.portals.dsl.Player
 
 /**
  * This class contains custom validation rules. 
@@ -35,6 +36,26 @@ class DslValidator extends AbstractDslValidator {
 			} else if (bot.name.equals(bot.destroy.get(i).name)) {
 				error("A bot cannot destroy itself.", DslPackage.Literals.BOT__DESTROY)
 			}
+		}
+	}
+	
+	@Check
+	def checkDestroy(Player player) {
+		for (var i = 0; i < player.destroy.length; i++) {
+			if (i != player.destroy.lastIndexOf(player.destroy.get(i))) {
+				error("The same bot is multiple times available.", DslPackage.Literals.PLAYER__DESTROY)
+			}
+		}
+	}
+	
+	@Check
+	def checkColor(Player player) {
+		var List<String> list = newArrayList
+		list.add("blue")
+		list.add("green")
+		
+		if (!list.contains(player.color)) {
+			error('Color is not available', DslPackage.Literals.PLAYER__COLOR)
 		}
 	}
 	
