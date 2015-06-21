@@ -129,7 +129,7 @@ class DslGenerator implements IGenerator {
 				override def toString = "«bot.symbol»"
 				override def destroy(player : Player) = player match {
 				  	case (player : Human) => «bot.endGame»
-					«FOR player : bot.bots»
+					«FOR player : bot.destroy»
 					case (player : «player.name.toFirstUpper») => true
 	    			«ENDFOR»
 					case _ => false
@@ -158,7 +158,7 @@ class DslGenerator implements IGenerator {
 			def invalidMove = new Human(uuid, position, Stay, movementCost)
 			def paiyMovementCost() = new Human(uuid, position, direction, movementCost - «player.speed»);
 			override def destroy(player : Player) = player match {
-				«FOR bot : player.bots»
+				«FOR bot : player.destroy»
 				case (player : «bot.name.toFirstUpper») => true
     			«ENDFOR»
 				case _ => false

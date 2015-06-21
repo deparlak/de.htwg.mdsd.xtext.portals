@@ -25,5 +25,16 @@ class DslValidator extends AbstractDslValidator {
 			error('Color is not available', DslPackage.Literals.BOT__COLOR)
 		}
 	}
+	
+	@Check
+	def checkDestroy(Bot bot) {
+		for (var i = 0; i < bot.destroy.length; i++) {
+			if (i != bot.destroy.lastIndexOf(bot.destroy.get(i))) {
+				error("The same bot is multiple times available.", DslPackage.Literals.BOT__DESTROY)
+			} else if (bot.name.equals(bot.destroy.get(i).name)) {
+				error("A bot cannot destroy itself.", DslPackage.Literals.BOT__DESTROY)
+			}
+		}
+	}
 
 }
