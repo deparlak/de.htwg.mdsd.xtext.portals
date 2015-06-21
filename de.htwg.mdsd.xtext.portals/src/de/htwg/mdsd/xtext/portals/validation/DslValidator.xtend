@@ -7,6 +7,7 @@ import java.util.List
 
 import org.eclipse.xtext.validation.Check
 import de.htwg.mdsd.xtext.portals.dsl.DslPackage
+import de.htwg.mdsd.xtext.portals.dsl.Terrain
 
 /**
  * This class contains custom validation rules. 
@@ -34,6 +35,17 @@ class DslValidator extends AbstractDslValidator {
 			} else if (bot.name.equals(bot.destroy.get(i).name)) {
 				error("A bot cannot destroy itself.", DslPackage.Literals.BOT__DESTROY)
 			}
+		}
+	}
+	
+	@Check
+	def checkImage(Terrain terrain) {
+		var List<String> list = newArrayList
+		list.add("grass")
+		list.add("wall")
+		
+		if (!list.contains(terrain.image)) {
+			error('Image is not available', DslPackage.Literals.TERRAIN__IMAGE)
 		}
 	}
 
