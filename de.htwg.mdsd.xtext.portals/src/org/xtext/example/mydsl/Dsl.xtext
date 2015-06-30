@@ -1,0 +1,31 @@
+grammar de.htwg.mdsd.xtext.portals.Dsl with org.eclipse.xtext.common.Terminals
+
+generate dsl "http://www.htwg.de/mdsd/xtext/portals/Dsl"
+
+Game: 'Game: ' name=ID  player=Player bots+=Bot* terrains+=Terrain*;
+	
+Bot: 'Bot' 
+	name=ID '=' symbol=STRING 
+	'with speed' speed=INT
+	'has color'  color=STRING
+	'destroys bot [' (destroy += [Bot])? (',' destroy += [Bot])* ']'
+	(endGame?='destroys player')? 
+;
+
+Terrain: 'Terrain' 
+	name=ID '=' symbol=STRING 
+	'has image' image=STRING
+	'with movement cost' movementCost=INT
+	(playerWalkable?='is walkable by player'|'is not walkable by player') 
+	'and walkable by [' (bots += [Bot])? (',' bots += [Bot])* ']'
+	(endGame?='end game')?
+;
+
+Player: 'Player' 
+	name=ID '=' symbol=STRING
+	'with speed' speed=INT
+	'has color'  color=STRING
+	'destroys bot [' (destroy += [Bot])? (',' destroy += [Bot])* ']'
+;
+
+terminal ID: ('A'..'Z') ('a'..'z'|'A'..'Z'|'0'..'9')*;

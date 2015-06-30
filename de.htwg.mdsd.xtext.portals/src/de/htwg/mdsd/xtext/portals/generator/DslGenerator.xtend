@@ -24,9 +24,7 @@ class DslGenerator implements IGenerator {
 	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
 		val game = resource.contents.filter(typeof(Game)).head
 
-		val packagePath = "de\\htwg\\mps\\portals\\" //+ game.name.toFirstLower
-		packageName = packageName //+ game.name.toFirstLower
-
+		val packagePath = "src\\main\\scala\\de\\htwg\\mps\\portals\\"
 		fsa.generateFile(packagePath + "\\model\\Terrain.scala", generateTerrains(game.terrains))
 		fsa.generateFile(packagePath + "\\model\\Human.scala", generatePlayer(game.player))
 		fsa.generateFile(packagePath + "\\model\\Bots.scala", generateBots(game.bots))
@@ -44,7 +42,7 @@ class DslGenerator implements IGenerator {
 	object TerrainSprite {
 	  def apply(terrain : Terrain) : TerrainSprite = terrain match {
         «FOR terrain : terrains»
-	    case «terrain.name» 	=> new «terrain.name»Sprite
+        case «terrain.name» 	=> new «terrain.name»Sprite
 		«ENDFOR»
 	  }
 	}
@@ -84,11 +82,29 @@ class DslGenerator implements IGenerator {
 		
 		class «player.name»Sprite extends PlayerSprite {
 		  val image = "/sprite/default/player/«player.color».png"
+		  val sprites: List[Sprite] = List(
+		    new Sprite(image, width, height, 0, 0),
+		    new Sprite(image, width, height, -32, 0),
+		    new Sprite(image, width, height, -64, 0),
+		    new Sprite(image, width, height, -96, 0),
+		    new Sprite(image, width, height, -128, 0),
+		    new Sprite(image, width, height, -160, 0),
+		    new Sprite(image, width, height, -192, 0),
+		    new Sprite(image, width, height, 0, 0))
 		}
 		
         «FOR bot : bots»
 		class «bot.name»Sprite extends PlayerSprite {
 		  val image = "/sprite/default/player/«bot.color».png"
+		  val sprites: List[Sprite] = List(
+		    new Sprite(image, width, height, 0, 0),
+		    new Sprite(image, width, height, -32, 0),
+		    new Sprite(image, width, height, -64, 0),
+		    new Sprite(image, width, height, -96, 0),
+		    new Sprite(image, width, height, -128, 0),
+		    new Sprite(image, width, height, -160, 0),
+		    new Sprite(image, width, height, -192, 0),
+		    new Sprite(image, width, height, 0, 0))
 		}
 		«ENDFOR»
 		'''
@@ -178,12 +194,17 @@ class DslGenerator implements IGenerator {
 			  def toString : String
 			}
 			
+			object DefaultTerrain {
+			def get = «terrains.get(0).name.toFirstUpper»
+			}
+			
 			// companion object to get Terrain instances, like a factory method.
 			object Terrain {
 			  def apply(char : Char) = char match {
 			«FOR terrain : terrains»
 				case '«terrain.symbol»' => «terrain.name.toFirstUpper»
 			«ENDFOR»
+				case _ => «terrains.get(0).name.toFirstUpper»
 			  }
 			}
 			
@@ -203,5 +224,4 @@ class DslGenerator implements IGenerator {
 			«ENDFOR»
 		'''
 	}
-
 }

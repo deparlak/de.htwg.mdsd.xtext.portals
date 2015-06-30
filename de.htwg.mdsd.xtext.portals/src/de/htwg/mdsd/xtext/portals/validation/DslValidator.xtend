@@ -9,6 +9,7 @@ import org.eclipse.xtext.validation.Check
 import de.htwg.mdsd.xtext.portals.dsl.DslPackage
 import de.htwg.mdsd.xtext.portals.dsl.Terrain
 import de.htwg.mdsd.xtext.portals.dsl.Player
+import de.htwg.mdsd.xtext.portals.dsl.Game
 
 /**
  * This class contains custom validation rules. 
@@ -18,13 +19,21 @@ import de.htwg.mdsd.xtext.portals.dsl.Player
 class DslValidator extends AbstractDslValidator {
 
 	@Check
+	def checkEntitys(Game game) {
+		game.bots
+		
+	}
+
+	@Check
 	def checkColor(Bot bot) {
 		var List<String> list = newArrayList
-		list.add("blue")
+		list.add("yellow")
 		list.add("green")
+		list.add("red")
+		list.add("blue")
 		
 		if (!list.contains(bot.color)) {
-			error('Color is not available', DslPackage.Literals.BOT__COLOR)
+			error('Color is not available. Use ' + list, DslPackage.Literals.BOT__COLOR)
 		}
 	}
 	
@@ -51,22 +60,32 @@ class DslValidator extends AbstractDslValidator {
 	@Check
 	def checkColor(Player player) {
 		var List<String> list = newArrayList
-		list.add("blue")
+		list.add("yellow")
 		list.add("green")
+		list.add("red")
+		list.add("blue")
 		
 		if (!list.contains(player.color)) {
-			error('Color is not available', DslPackage.Literals.PLAYER__COLOR)
+			error('Color is not available. Use ' + list, DslPackage.Literals.PLAYER__COLOR)
 		}
 	}
 	
 	@Check
 	def checkImage(Terrain terrain) {
 		var List<String> list = newArrayList
+		list.add("black")
+		list.add("blue")
+		list.add("brown")
+		list.add("green")
+		list.add("red")
+		list.add("white")
 		list.add("grass")
+		list.add("portal")
+		list.add("swamp")
 		list.add("wall")
 		
 		if (!list.contains(terrain.image)) {
-			error('Image is not available', DslPackage.Literals.TERRAIN__IMAGE)
+			error('Image is not available. Use ' + list, DslPackage.Literals.TERRAIN__IMAGE)
 		}
 	}
 
